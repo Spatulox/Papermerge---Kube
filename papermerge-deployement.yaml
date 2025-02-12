@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: papermerge-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: papermerge-app
+  template:
+    metadata:
+      labels:
+        app: papermerge-app
+    spec:
+      containers:
+      - name: papermerge-webserver
+        image: papermerge/papermerge:v3.0.1
+        ports:
+        - containerPort: 8000
+        env:
+        - name: PAPERMERGE__DATABASE__URL
+          value: "postgres://papermerge:pmg-secret@postgres-service:5432/papermerge"
+        - name: PAPERMERGE__REDIS__URL
+          value: "redis://redis-service:6379/0"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: papermerge-service
+spec:
+  selector:
+    app: papermerge-app
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: ClusterIP
