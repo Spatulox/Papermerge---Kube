@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: papermerge-s3worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: papermerge-s3worker
+  template:
+    metadata:
+      labels:
+        app: papermerge-s3worker
+    spec:
+      containers:
+      - name: s3worker
+        image: papermerge/s3worker:0.4.3
+        volumeMounts:
+        - name: media-storage
+          mountPath: /var/media/pmg
+        env:
+        - name: AWS_ACCESS_KEY_ID
+          value: "2e8817266261610810596a50b8f4a8c5"
+        - name: AWS_REGION_NAME
+          value: "us-east-1"
+        - name: AWS_S3_ENDPOINT
+          value: "http://paperless-minio:9000"
+        - name: AWS_SECRET_ACCESS_KEY
+          value: "a503071debfa3ac0c1de1cd79f"
+        - name: PAPERMERGE__DATABASE__URL
+          value: "postgresql://papermerge:pmg-secret@papermerge-database:5432/papermerge"
+        - name: PAPERMERGE__MAIN__MEDIA_ROOT
+          value: "/var/media/pmg"
+        - name: PAPERMERGE__REDIS__URL
+          value: "redis://papermerge-redis:6379/0"
+        - name: PAPERMERGE__S3__BUCKET_NAME
+          value: "papermerge"
+        - name: S3_WORKER_ARGS
+          value: "-Q s3,s3preview -c 2"
+      volumes:
+      - name: media-storage
+        emptyDir: {}
