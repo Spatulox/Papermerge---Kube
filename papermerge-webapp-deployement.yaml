@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: papermerge-web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: papermerge-web
+  template:
+    metadata:
+      labels:
+        app: papermerge-web
+    spec:
+      containers:
+      - name: papermerge
+        image: papermerge/papermerge:3.3.1
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: media-storage
+          mountPath: /var/media/pmg
+        env:
+        - name: PAPERMERGE__AUTH__USERNAME
+          value: "admin"
+        - name: PAPERMERGE__AUTH__PASSWORD
+          value: "secret"
+        - name: PAPERMERGE__DATABASE__URL
+          value: "postgresql://papermerge:pmg-secret@papermerge-database:5432/papermerge"
+        - name: PAPERMERGE__MAIN__MEDIA_ROOT
+          value: "/var/media/pmg"
+        - name: PAPERMERGE__OCR__LANG_CODES
+          value: "eng,fra"
+        - name: PAPERMERGE__OCR__DEFAULT_LANG_CODE
+          value: "eng"
+        - name: PAPERMERGE__REDIS__URL
+          value: "redis://papermerge-redis:6379/0"
+        - name: PAPERMERGE__SECURITY__SECRET_KEY
+          value: "8aa9127e904324e1d93c2b68483a327c3b5be964dd161e3e4df8dbca0443ec21"
+      volumes:
+      - name: media-storage
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: papermerge-web-service
+spec:
+  selector:
+    app: papermerge-web
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
