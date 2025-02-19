@@ -13,32 +13,32 @@ spec:
         app: minio
     spec:
       containers:
-      - name: minio
-        image: minio/minio:latest
-        ports:
-        - containerPort: 9000
-        - containerPort: 9001
-        args:
-        - server
-        - --console-address
-        - :9001
-        - /data
-        env:
-        - name: MINIO_ROOT_USER
-          value: "2e8817266261610810596a50b8f4a8c5"
-        - name: MINIO_ROOT_PASSWORD
-          value: "a503071debfa3ac0c1de1cd79f"
-        volumeMounts:
-        - name: data
-          mountPath: /data
+        - name: minio
+          image: minio/minio:latest
+          ports:
+            - containerPort: 9000
+            - containerPort: 9001
+          args:
+            - server
+            - --console-address
+            - :9001
+            - /data
+          env:
+            - name: MINIO_ROOT_USER
+              value: 2e8817266261610810596a50b8f4a8c5
+            - name: MINIO_ROOT_PASSWORD
+              value: a503071debfa3ac0c1de1cd79f
+          volumeMounts:
+            - name: data
+              mountPath: /data
       volumes:
-      - name: data
-        emptyDir: {}
+        - name: data
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: minio-service
+  name: minio-lb
 spec:
   selector:
     app: minio
@@ -52,3 +52,15 @@ spec:
       port: 9001
       targetPort: 9001
   type: LoadBalancer
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-cluster
+spec:
+  selector:
+    app: minio
+  ports:
+    - port: 9000
+      targetPort: 9000
+  type: ClusterIP

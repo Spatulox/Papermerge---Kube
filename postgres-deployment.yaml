@@ -13,33 +13,57 @@ spec:
         app: postgres
     spec:
       containers:
-      - name: postgres
-        image: postgres:17-alpine
-        ports:
-        - containerPort: 5432
-        env:
-        - name: POSTGRES_DB
-          value: "papermerge"
-        - name: POSTGRES_USER
-          value: "papermerge"
-        - name: POSTGRES_PASSWORD
-          value: "pmg-secret"
-        volumeMounts:
-        - mountPath: /var/lib/postgresql/data
-          name: postgres-data
+        - name: postgres
+          image: postgres:17-alpine
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: papermerge
+            - name: POSTGRES_USER
+              value: papermerge
+            - name: POSTGRES_PASSWORD
+              value: pmg-secret
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgres-data
       volumes:
-      - name: postgres-data
-        emptyDir: {}
+        - name: postgres-data
+          persistentVolumeClaim:
+            claimName: postgres-pvc
+
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: postgres-service
+  name: papermerge-database
 spec:
   selector:
     app: postgres
   ports:
-    - protocol: TCP
-      port: 5432
+    - port: 5432
       targetPort: 5432
   type: ClusterIP
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-pv
+spec:
+  capacity:
+    storage: 4Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "C:\\Users\\Basile\\OneDrive\\Documents\\ESGI\\3S1\\kube\\Papermerge---Kube\\postgres-data"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
