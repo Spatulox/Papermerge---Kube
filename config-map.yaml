@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: papermerge-config
+data:
+  database-url: "postgresql://papermerge:pmg-secret@papermerge-database:5432/papermerge"
+  redis-url: "redis://papermerge-redis:6379/0"

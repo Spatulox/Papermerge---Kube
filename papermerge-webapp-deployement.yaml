@@ -26,7 +26,10 @@ spec:
         - name: PAPERMERGE__AUTH__PASSWORD
           value: "secret"
         - name: PAPERMERGE__DATABASE__URL
-          value: "postgresql://papermerge:pmg-secret@papermerge-database:5432/papermerge"
+          valueFrom:
+            configMapKeyRef:
+              name: papermerge-config
+              key: database-url
         - name: PAPERMERGE__MAIN__MEDIA_ROOT
           value: "/var/media/pmg"
         - name: PAPERMERGE__OCR__LANG_CODES
@@ -34,7 +37,10 @@ spec:
         - name: PAPERMERGE__OCR__DEFAULT_LANG_CODE
           value: "eng"
         - name: PAPERMERGE__REDIS__URL
-          value: "redis://papermerge-redis:6379/0"
+          valueFrom:
+            configMapKeyRef:
+              name: papermerge-config
+              key: redis-url
         - name: PAPERMERGE__SECURITY__SECRET_KEY
           value: "8aa9127e904324e1d93c2b68483a327c3b5be964dd161e3e4df8dbca0443ec21"
       volumes:
